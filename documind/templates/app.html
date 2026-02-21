@@ -1,0 +1,759 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DocuMind — Document Vault</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0ede8;--bg2:#e8e3dc;--sb:#16213e;--sb2:#0f172a;--card:#ffffff;--border:#e2ddd7;--accent:#e85d26;--accent2:#f5a623;--safe:#16a34a;--warn:#d97706;--danger:#dc2626;--blue:#2563eb;--text:#1c1917;--text2:#57534e;--text3:#a8a29e;--sh:0 2px 16px rgba(0,0,0,.08);--shl:0 8px 40px rgba(0,0,0,.14)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh}
+/* SIDEBAR */
+.sb{width:258px;flex-shrink:0;background:var(--sb);display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative}
+.sb::before{content:'';position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(232,93,38,.12),transparent 70%);pointer-events:none}
+.sb-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo-row{display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(232,93,38,.4)}
+.sb-logo-txt{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff}
+.sb-logo-txt span{color:var(--accent2)}
+.sb-logo-sub{font-size:10.5px;color:rgba(157,142,196,.7);margin-top:2px;letter-spacing:.4px}
+.sb-sect{padding:18px 12px 6px}
+.sb-label{font-size:10px;font-weight:700;color:rgba(157,142,196,.6);text-transform:uppercase;letter-spacing:2px;padding:0 8px;margin-bottom:5px}
+.nav{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;cursor:pointer;color:rgba(157,142,196,.7);font-size:13.5px;font-weight:500;transition:all .18s;margin-bottom:1px;position:relative}
+.nav:hover{background:rgba(255,255,255,.07);color:rgba(226,217,243,.9)}
+.nav.active{background:rgba(232,93,38,.18);color:#fff}
+.nav.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--accent);border-radius:0 3px 3px 0}
+.nav-ic{font-size:16px;width:20px;text-align:center}
+.nbadge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+.nbadge.w{background:var(--warn)}.nbadge.d{background:var(--danger)}
+.sb-footer{margin-top:auto;padding:14px 12px;border-top:1px solid rgba(255,255,255,.06)}
+.user-card{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,.05);cursor:pointer;transition:.2s}
+.user-card:hover{background:rgba(255,255,255,.09)}
+.uavatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;font-family:'Syne',sans-serif}
+.uname{font-size:13px;font-weight:600;color:rgba(226,217,243,.9)}
+.urole{font-size:11px;color:rgba(157,142,196,.6)}
+.logout-btn{margin-left:auto;background:none;border:none;color:rgba(157,142,196,.5);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:.2s}
+.logout-btn:hover{color:#f87171;background:rgba(248,113,113,.1)}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{height:62px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 26px;gap:12px;flex-shrink:0}
+.topbar-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;flex:1}
+.sw{position:relative;width:270px}
+.sw input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px 13px 8px 36px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
+.sw input:focus{border-color:var(--accent)}.sw input::placeholder{color:var(--text3)}
+.sw-ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;white-space:nowrap}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 3px 14px rgba(232,93,38,.3)}.btn-p:hover{background:#d4521f;transform:translateY(-1px)}
+.btn-g{background:var(--bg);border:1.5px solid var(--border);color:var(--text2)}.btn-g:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:7px}
+.btn-ds{background:#fef2f2;border:1.5px solid #fecaca;color:var(--danger)}.btn-ds:hover{background:#fee2e2}
+.content{flex:1;overflow-y:auto;padding:26px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+/* PAGES */
+.page{display:none}.page.active{display:block}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.sc{background:var(--card);border:1.5px solid var(--border);border-radius:15px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default}
+.sc:hover{transform:translateY(-3px);box-shadow:var(--shl)}
+.sc::after{content:'';position:absolute;bottom:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.08}
+.sc.cb::after{background:var(--blue)}.sc.cg::after{background:var(--safe)}.sc.cw::after{background:var(--warn)}.sc.cr::after{background:var(--danger)}
+.sc-ic{font-size:26px;margin-bottom:10px}
+.sc-val{font-family:'Syne',sans-serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:3px}
+.sc-val.cb{color:var(--blue)}.sc-val.cg{color:var(--safe)}.sc-val.cw{color:var(--warn)}.sc-val.cr{color:var(--danger)}
+.sc-lbl{font-size:12.5px;color:var(--text2);font-weight:500}
+/* DASH PANELS */
+.dash-row{display:grid;grid-template-columns:1fr 320px;gap:18px}
+.panel{background:var(--card);border:1.5px solid var(--border);border-radius:15px;overflow:hidden}
+.ph{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ph-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.pb{padding:14px 20px}
+.chip{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11.5px;color:var(--text2)}
+/* ALERTS */
+.ai{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);animation:fi .3s ease both}
+.ai:last-child{border-bottom:none}
+.adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.adot.expiring{background:var(--warn);box-shadow:0 0 0 3px rgba(217,119,6,.2)}
+.adot.expired{background:var(--danger);box-shadow:0 0 0 3px rgba(220,38,38,.2)}
+.an{font-size:13.5px;font-weight:600;flex:1}
+.ad{font-size:12px;color:var(--text2)}.ad.expired{color:var(--danger);font-weight:600}.ad.expiring{color:var(--warn);font-weight:600}
+/* CAT */
+.ci{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ci:last-child{border-bottom:none}
+.ci-ic{font-size:17px;width:28px;text-align:center}.ci-nm{flex:1;font-size:13px;color:var(--text2)}
+.ci-ct{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.ci-bar{width:55px;height:4px;background:var(--bg2);border-radius:2px}
+.ci-barfill{height:100%;border-radius:2px;background:var(--accent);transition:width .6s}
+/* TABLE */
+.tw{background:var(--card);border:1.5px solid var(--border);border-radius:15px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--bg2)}
+th{padding:11px 14px;text-align:left;font-size:10.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--bg)}
+tbody tr{transition:background .15s;animation:fi .3s ease both}
+.sbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600}
+.sbadge.safe{background:#dcfce7;color:var(--safe)}.sbadge.expiring{background:#fef3c7;color:var(--warn)}.sbadge.expired{background:#fee2e2;color:var(--danger)}
+.tychip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--text2);background:var(--bg2);border-radius:5px;padding:3px 7px}
+/* GRID */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px}
+.dcg{background:var(--card);border:1.5px solid var(--border);border-radius:15px;overflow:hidden;transition:all .2s;animation:fi .3s ease both;cursor:default}
+.dcg:hover{transform:translateY(-3px);box-shadow:var(--shl);border-color:var(--accent)}
+.dcg-top{padding:16px 16px 12px;display:flex;align-items:flex-start;gap:12px}
+.dcg-ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.dcg-nm{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:2px}
+.dcg-num{font-size:11.5px;color:var(--text2);font-family:monospace}
+.dcg-foot{padding:11px 16px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.exp-txt{font-size:11.5px;color:var(--text2)}.exp-txt strong{display:block;font-size:12.5px;font-weight:700}
+.exp-txt strong.safe{color:var(--safe)}.exp-txt strong.expiring{color:var(--warn)}.exp-txt strong.expired{color:var(--danger)}
+/* TOOLBAR */
+.doc-tb{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+select.sel{background:var(--card);border:1.5px solid var(--border);border-radius:9px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;cursor:pointer;transition:border-color .2s}
+select.sel:focus{border-color:var(--accent)}
+.vt{display:flex;gap:3px;background:var(--card);border:1.5px solid var(--border);border-radius:9px;padding:3px}
+.vb{padding:5px 9px;border-radius:6px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text2);transition:all .15s}
+.vb.active{background:var(--accent);color:#fff}
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border-radius:20px;width:100%;max-width:580px;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);transform:scale(.94) translateY(14px);transition:transform .25s}
+.overlay.open .modal{transform:scale(1) translateY(0)}
+.mh{padding:22px 26px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:1}
+.mh-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700}
+.mclose{background:none;border:none;font-size:19px;cursor:pointer;color:var(--text2);padding:4px;border-radius:6px}.mclose:hover{background:var(--bg2)}
+.mb{padding:20px 26px}.mf{padding:14px 26px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px}
+.fg{margin-bottom:15px}
+label.lbl{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.req{color:var(--accent)}
+input.inp,select.inp,textarea.inp{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--text);outline:none;transition:border-color .2s}
+input.inp:focus,select.inp:focus,textarea.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,93,38,.08)}
+textarea.inp{resize:vertical;min-height:68px}
+input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+/* UPLOAD */
+.upzone{border:2px dashed var(--border);border-radius:11px;padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)}
+.upzone:hover,.upzone.dv{border-color:var(--accent);background:rgba(232,93,38,.04)}
+.upzone-ic{font-size:30px;margin-bottom:6px}
+.upzone-txt{font-size:13px;color:var(--text2)}.upzone-txt strong{color:var(--accent)}
+.upfp{display:flex;align-items:center;gap:9px;padding:9px 13px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:9px;margin-top:9px;font-size:13px;color:var(--safe)}
+/* DETECTION */
+.det-box{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(99,102,241,.04));border:1.5px solid rgba(99,102,241,.25);border-radius:11px;padding:14px 16px;margin-top:10px}
+.det-title{font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.det-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.det-icon{font-size:16px;flex-shrink:0}
+.det-txt{font-size:13px;color:var(--text2)}.det-txt strong{color:var(--text)}
+.det-conf{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700}
+.det-conf.high{background:#dcfce7;color:var(--safe)}.det-conf.medium{background:#fef3c7;color:var(--warn)}.det-conf.low{background:#fce7f3;color:#be185d}.det-conf.none{background:var(--bg2);color:var(--text3)}
+.use-btn{margin-top:6px;font-size:12px;padding:5px 12px;border-radius:7px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);color:#6366f1;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
+.use-btn:hover{background:rgba(99,102,241,.2)}
+/* CUSTOM TYPE */
+.custom-fields{display:none;padding:12px 14px;background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.2);border-radius:10px;margin-top:10px}
+.custom-fields.show{display:block}
+/* VIEW */
+.vfield{margin-bottom:12px}
+.vlbl{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.vval{font-size:14.5px;color:var(--text)}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+/* SETTINGS */
+.ss{background:var(--card);border:1.5px solid var(--border);border-radius:14px;margin-bottom:18px;overflow:hidden}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sr-lbl{font-size:14px;font-weight:600}.sr-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.toggle{width:42px;height:23px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;border:none}
+.toggle.on{background:var(--accent)}.toggle::after{content:'';position:absolute;width:17px;height:17px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}.toggle.on::after{left:22px}
+/* NOTIF */
+.ni{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);animation:fi .3s ease both}
+.ni:last-child{border-bottom:none}
+.ni-ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.ni-ic.expired{background:#fee2e2}.ni-ic.expiring{background:#fef3c7}
+.ni-title{font-weight:700;font-size:13.5px;margin-bottom:2px}
+.ni-body{font-size:12.5px;color:var(--text2)}.ni-time{font-size:11px;color:var(--text3);margin-top:2px}
+/* CHANGE PIN */
+.pin-section{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+.pin-section h3{font-family:'Syne',sans-serif;font-size:16px;margin-bottom:4px}
+.pin-section p{font-size:13px;color:var(--text2);margin-bottom:18px}
+/* EMPTY */
+.empty{text-align:center;padding:56px 20px}
+.empty-emoji{font-size:52px;margin-bottom:14px;opacity:.4}
+.empty-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;margin-bottom:7px}
+.empty-sub{font-size:13.5px;color:var(--text2);margin-bottom:18px}
+/* TOAST */
+.tw-wrap{position:fixed;bottom:26px;right:26px;z-index:900;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--text);color:#fff;border-radius:11px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:var(--shl);animation:tst .3s ease;max-width:290px}
+@keyframes tst{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.toast.success{background:var(--safe)}.toast.warn{background:var(--warn)}.toast.error{background:var(--danger)}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* SEC HEAD */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sh-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.sh-sub{font-size:12.5px;color:var(--text2);margin-top:2px}
+/* Tags */
+.tag{display:inline-block;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);color:#6366f1;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px}
+</style></head>
+<body>
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-row">
+      <div class="sb-logo-icon">🧠</div>
+      <div>
+        <div class="sb-logo-txt">Docu<span>Mind</span></div>
+        <div class="sb-logo-sub">🔐 Encrypted Vault</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-sect">
+    <div class="sb-label">Main</div>
+    <div class="nav active" onclick="goPage('dashboard',this)"><span class="nav-ic">🏠</span> Dashboard</div>
+    <div class="nav" onclick="goPage('documents',this)"><span class="nav-ic">📂</span> My Documents <span class="nbadge" id="nb-total">0</span></div>
+    <div class="nav" onclick="goPage('alerts',this)"><span class="nav-ic">🔔</span> Alerts <span class="nbadge w" id="nb-alerts" style="display:none">0</span></div>
+  </div>
+  <div class="sb-sect">
+    <div class="sb-label">Categories</div>
+    <div class="nav" onclick="filterByType('passport')"><span class="nav-ic">🛂</span> Passport/Visa</div>
+    <div class="nav" onclick="filterByType('license')"><span class="nav-ic">🚗</span> Driving License</div>
+    <div class="nav" onclick="filterByType('insurance')"><span class="nav-ic">🏥</span> Insurance</div>
+    <div class="nav" onclick="filterByType('aadhaar')"><span class="nav-ic">🪪</span> Aadhaar Card</div>
+    <div class="nav" onclick="filterByType('pan')"><span class="nav-ic">💳</span> PAN Card</div>
+    <div class="nav" onclick="filterByType('voter')"><span class="nav-ic">🗳️</span> Voter ID</div>
+    <div class="nav" onclick="filterByType('custom')"><span class="nav-ic">📁</span> Custom Docs</div>
+  </div>
+  <div class="sb-sect">
+    <div class="sb-label">Account</div>
+    <div class="nav" onclick="goPage('settings',this)"><span class="nav-ic">⚙️</span> Settings</div>
+  </div>
+  <div class="sb-footer">
+    <div class="user-card">
+      <div class="uavatar">🔐</div>
+      <div><div class="uname">My Vault</div><div class="urole">AES-256 Encrypted</div></div>
+      <button class="logout-btn" onclick="logout()" title="Lock vault">🔒</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pg-title">Dashboard</div>
+    <div class="sw"><span class="sw-ic">🔍</span><input type="text" placeholder="Search documents…" id="gSearch" oninput="onSearch()"></div>
+    <button class="btn btn-g" onclick="exportCSV()">📤 Export</button>
+    <button class="btn btn-p" onclick="openAdd()">＋ Add Document</button>
+  </div>
+
+  <div class="content">
+    <!-- DASHBOARD -->
+    <div class="page active" id="pg-dashboard">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="dash-row">
+        <div class="panel">
+          <div class="ph"><div class="ph-title">⚠️ Expiry Alerts</div><span class="chip" id="alert-chip">0 alerts</span></div>
+          <div class="pb" id="dash-alerts" style="max-height:290px;overflow-y:auto"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">📊 By Category</div></div>
+          <div class="pb" id="dash-cats"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="page" id="pg-documents">
+      <div class="sh">
+        <div><div class="sh-title">My Documents</div><div class="sh-sub" id="doc-sub">All documents</div></div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <select class="sel" id="tf" onchange="renderDocs()">
+            <option value="">All Types</option>
+            <option value="passport">🛂 Passport/Visa</option><option value="license">🚗 Driving License</option>
+            <option value="insurance">🏥 Insurance</option><option value="aadhaar">🪪 Aadhaar</option>
+            <option value="pan">💳 PAN Card</option><option value="voter">🗳️ Voter ID</option>
+            <option value="rc">🚙 RC/Vehicle</option><option value="birth">📜 Birth Cert.</option>
+            <option value="edu">🎓 Educational</option><option value="medical">💊 Medical</option>
+            <option value="property">🏠 Property</option><option value="bank">🏦 Bank</option>
+            <option value="tax">📊 Tax/ITR</option><option value="custom">📁 Custom</option>
+          </select>
+          <select class="sel" id="sf" onchange="renderDocs()">
+            <option value="">All Status</option><option value="safe">✅ Valid</option>
+            <option value="expiring">⚠️ Expiring Soon</option><option value="expired">❌ Expired</option>
+          </select>
+          <div class="vt">
+            <button class="vb active" id="vl" onclick="setView('list')" title="List">☰</button>
+            <button class="vb" id="vg" onclick="setView('grid')" title="Grid">⊞</button>
+          </div>
+        </div>
+      </div>
+      <div id="docs-container"></div>
+    </div>
+
+    <!-- ALERTS PAGE -->
+    <div class="page" id="pg-alerts">
+      <div class="sh"><div><div class="sh-title">🔔 Alerts & Notifications</div><div class="sh-sub">Documents needing attention</div></div></div>
+      <div class="panel"><div class="pb" id="alerts-page" style="padding:8px 20px"></div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="pg-settings">
+      <div class="sh"><div><div class="sh-title">⚙️ Settings</div><div class="sh-sub">Vault preferences & security</div></div></div>
+      <div class="pin-section">
+        <h3>🔑 Change Master PIN</h3>
+        <p>Re-encrypt your vault with a new PIN</p>
+        <div class="fr2">
+          <div class="fg"><label class="lbl">Current PIN</label><input class="inp" type="password" id="oldPin" placeholder="Current PIN"></div>
+          <div class="fg"><label class="lbl">New PIN</label><input class="inp" type="password" id="newPin" placeholder="New PIN (min 4)"></div>
+        </div>
+        <button class="btn btn-p" onclick="changePIN()">🔐 Update PIN</button>
+      </div>
+      <div class="ss">
+        <div class="ph"><div class="ph-title">Notifications</div></div>
+        <div class="sr"><div><div class="sr-lbl">30-Day Expiry Alerts</div><div class="sr-sub">Warn when document expires within 30 days</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="sr"><div><div class="sr-lbl">Expired Document Warnings</div><div class="sr-sub">Highlight already-expired documents</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="sr"><div><div class="sr-lbl">60-Day Early Warning</div><div class="sr-sub">Get early warnings 60 days before expiry</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="ss">
+        <div class="ph"><div class="ph-title">Data Management</div></div>
+        <div class="sr"><div><div class="sr-lbl">Export All Documents</div><div class="sr-sub">Download as CSV file</div></div><button class="btn btn-g btn-sm" onclick="exportCSV()">📤 Export CSV</button></div>
+        <div class="sr"><div><div class="sr-lbl">Auto-Detection Engine</div><div class="sr-sub">OCR + pattern-matching for expiry dates</div></div><span class="chip" style="background:#dcfce7;color:var(--safe);border-color:#bbf7d0">Active ✅</span></div>
+      </div>
+      <div class="ss">
+        <div class="ph"><div class="ph-title">About DocuMind</div></div>
+        <div class="sr"><div><div class="sr-lbl">Encryption</div><div class="sr-sub">PBKDF2 (390,000 iters) + AES-256-Fernet</div></div><span class="chip">Military Grade 🔐</span></div>
+        <div class="sr"><div><div class="sr-lbl">Storage</div><div class="sr-sub">All data stored locally on your device</div></div><span class="chip">Local Only 💻</span></div>
+        <div class="sr"><div><div class="sr-lbl">Version</div><div class="sr-sub">DocuMind v2.0 — Python+Flask</div></div><span style="font-size:12px;color:var(--text3)">Built with ❤️</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="addOv" onclick="ovClick(event,'addOv')">
+<div class="modal">
+  <div class="mh"><div class="mh-title" id="mTitle">📄 Add New Document</div><button class="mclose" onclick="closeOv('addOv')">✕</button></div>
+  <div class="mb">
+    <div class="fr2">
+      <div class="fg"><label class="lbl">Document Name <span class="req">*</span></label><input class="inp" id="fName" type="text" placeholder="e.g. My Passport"></div>
+      <div class="fg">
+        <label class="lbl">Document Type <span class="req">*</span></label>
+        <select class="inp" id="fType" onchange="onTypeChange()">
+          <option value="passport">🛂 Passport / Visa</option>
+          <option value="license">🚗 Driving License</option>
+          <option value="insurance">🏥 Insurance</option>
+          <option value="aadhaar">🪪 Aadhaar Card</option>
+          <option value="pan">💳 PAN Card</option>
+          <option value="voter">🗳️ Voter ID</option>
+          <option value="rc">🚙 RC / Vehicle Reg.</option>
+          <option value="birth">📜 Birth Certificate</option>
+          <option value="edu">🎓 Educational Cert.</option>
+          <option value="medical">💊 Medical Record</option>
+          <option value="property">🏠 Property Document</option>
+          <option value="bank">🏦 Bank Document</option>
+          <option value="tax">📊 Tax / ITR</option>
+          <option value="custom">📁 ➕ Other / Custom…</option>
+        </select>
+        <div class="custom-fields" id="customFields">
+          <label class="lbl" style="margin-top:0">Custom Type Label</label>
+          <div style="display:flex;gap:8px">
+            <input class="inp" id="fCustomIcon" type="text" placeholder="Icon e.g. 📋" style="width:60px;text-align:center;font-size:18px">
+            <input class="inp" id="fCustomLabel" type="text" placeholder="e.g. Club Membership">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="lbl">Document Number</label><input class="inp" id="fNumber" type="text" placeholder="e.g. A1234567"></div>
+      <div class="fg"><label class="lbl">Issued By</label><input class="inp" id="fIssuer" type="text" placeholder="e.g. Govt. of India"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="lbl">Issue Date</label><input class="inp" id="fIssue" type="date"></div>
+      <div class="fg"><label class="lbl">Expiry Date <span class="req">*</span></label><input class="inp" id="fExpiry" type="date"></div>
+    </div>
+    <!-- FILE UPLOAD -->
+    <div class="fg">
+      <label class="lbl">Upload Document File <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(auto-detects expiry)</span></label>
+      <div class="upzone" id="upzone" onclick="document.getElementById('fFile').click()" ondragover="dov(event)" ondrop="doDrop(event)" ondragleave="dlv()">
+        <div class="upzone-ic">📎</div>
+        <div class="upzone-txt"><strong>Click to upload</strong> or drag & drop</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px">PDF, JPG, PNG up to 10MB • Auto-detects expiry date</div>
+      </div>
+      <input type="file" id="fFile" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="handleFile(this)">
+      <div id="fFilePrev" style="display:none"></div>
+      <div id="detectionBox" style="display:none"></div>
+    </div>
+    <!-- TEXT DETECT -->
+    <div class="fg">
+      <label class="lbl">Or Paste Document Text <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(for auto-detection)</span></label>
+      <textarea class="inp" id="fText" placeholder="Paste text from your document here — DocuMind will auto-detect the expiry date…" style="min-height:56px" oninput="scheduleTextDetect()"></textarea>
+    </div>
+    <div class="fg"><label class="lbl">Notes</label><textarea class="inp" id="fNotes" placeholder="Any additional notes…"></textarea></div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-g" onclick="closeOv('addOv')">Cancel</button>
+    <button class="btn btn-p" onclick="saveDoc()">💾 Save Document</button>
+  </div>
+</div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="overlay" id="viewOv" onclick="ovClick(event,'viewOv')">
+<div class="modal">
+  <div class="mh"><div class="mh-title" id="vTitle">Document Details</div><button class="mclose" onclick="closeOv('viewOv')">✕</button></div>
+  <div class="mb" id="vBody"></div>
+  <div class="mf"><button class="btn btn-g" onclick="closeOv('viewOv')">Close</button><button class="btn btn-p" id="vEditBtn">✏️ Edit</button></div>
+</div>
+</div>
+
+<div class="tw-wrap" id="toastWrap"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let allDocs=[], docTypes={}, editId=null, currentView='list', fileRef=null, detectTimer=null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+async function init(){
+  const r=await fetch('/api/docs');
+  if(r.status===401){window.location.href='/';return;}
+  const d=await r.json();
+  allDocs=d.docs||[]; docTypes=d.types||{};
+  renderAll();
+}
+
+async function refreshStats(){
+  const r=await fetch('/api/stats');
+  const d=await r.json();
+  renderStats(d);
+  renderDashAlerts(d.alerts||[]);
+  renderCats(d.by_type||{});
+  updateBadges(d);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+const titles={dashboard:'Dashboard',documents:'My Documents',alerts:'🔔 Alerts',settings:'⚙️ Settings'};
+function goPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('pg-title').textContent=titles[name]||name;
+  if(name==='documents'){document.getElementById('tf').value='';renderDocs();}
+  if(name==='alerts')renderAlertsPage();
+}
+function filterByType(t){
+  goPage('documents',null);
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  document.getElementById('pg-title').textContent=docTypes[t]?.label||'Documents';
+  document.getElementById('tf').value=t;
+  renderDocs();
+}
+function onSearch(){if(document.getElementById('pg-documents').classList.contains('active'))renderDocs();}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function renderAll(){
+  refreshStats();
+  renderDocs();
+}
+
+function renderStats(s){
+  if(!s)return;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="sc cb"><div class="sc-ic">📂</div><div class="sc-val cb">${s.total}</div><div class="sc-lbl">Total Documents</div></div>
+    <div class="sc cg"><div class="sc-ic">✅</div><div class="sc-val cg">${s.safe}</div><div class="sc-lbl">Valid & Safe</div></div>
+    <div class="sc cw"><div class="sc-ic">⚠️</div><div class="sc-val cw">${s.expiring}</div><div class="sc-lbl">Expiring Soon</div></div>
+    <div class="sc cr"><div class="sc-ic">❌</div><div class="sc-val cr">${s.expired}</div><div class="sc-lbl">Already Expired</div></div>`;
+}
+
+function renderDashAlerts(alerts){
+  document.getElementById('alert-chip').textContent=alerts.length+' alerts';
+  const el=document.getElementById('dash-alerts');
+  if(!alerts.length){el.innerHTML='<div style="text-align:center;padding:28px;color:var(--text3);font-size:13.5px">🎉 All documents are valid!</div>';return;}
+  el.innerHTML=alerts.map(d=>{
+    const dl=d.days_left, st=d.status, ti=d.type_info||{};
+    const dlt=dl<0?`${Math.abs(dl)}d ago`:dl===0?'Today!':dl+'d left';
+    return `<div class="ai"><div class="adot ${st}"></div><div style="flex:1;min-width:0"><div class="an">${esc(d.name)}</div><div style="font-size:11.5px;color:var(--text2)">${ti.icon||'📄'} ${ti.label||d.type}</div></div><div class="ad ${st}">${dlt}</div><button class="btn btn-g btn-sm" onclick="viewDoc('${d.id}')">View</button></div>`;
+  }).join('');
+}
+
+function renderCats(byType){
+  const entries=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  const max=entries[0]?.[1]||1;
+  document.getElementById('dash-cats').innerHTML=entries.map(([t,c])=>{
+    const ti=docTypes[t]||{icon:'📄',label:t};
+    return `<div class="ci"><div class="ci-ic">${ti.icon}</div><div class="ci-nm">${ti.label}</div><div class="ci-bar"><div class="ci-barfill" style="width:${Math.round(c/max*100)}%"></div></div><div class="ci-ct">${c}</div></div>`;
+  }).join('')||'<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">No documents yet</div>';
+}
+
+function updateBadges(s){
+  document.getElementById('nb-total').textContent=s.total;
+  const nb=document.getElementById('nb-alerts');
+  const cnt=(s.expiring||0)+(s.expired||0);
+  if(cnt>0){nb.style.display='';nb.textContent=cnt;}else{nb.style.display='none';}
+}
+
+function renderAlertsPage(){
+  const alerts=allDocs.filter(d=>['expiring','expired'].includes(d.status)).sort((a,b)=>new Date(a.expiry)-new Date(b.expiry));
+  const el=document.getElementById('alerts-page');
+  if(!alerts.length){el.innerHTML='<div class="empty"><div class="empty-emoji">🎉</div><div class="empty-title">No Alerts!</div><div class="empty-sub">All documents valid.</div></div>';return;}
+  el.innerHTML=alerts.map(d=>{
+    const st=d.status,dl=d.days_left,ti=d.type_info||{};
+    const msg=st==='expired'?`Expired ${Math.abs(dl)} day${Math.abs(dl)!==1?'s':''} ago. Renew immediately.`:`Expires in ${dl} day${dl!==1?'s':''}. Renew before ${fmtDate(d.expiry)}.`;
+    return `<div class="ni"><div class="ni-ic ${st}">${ti.icon||'📄'}</div><div style="flex:1"><div class="ni-title">${esc(d.name)}</div><div class="ni-body">${msg}</div><div class="ni-time">${ti.label||d.type} · Expiry: ${fmtDate(d.expiry)}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn btn-g btn-sm" onclick="viewDoc('${d.id}')">View</button><button class="btn btn-p btn-sm" onclick="editDoc('${d.id}')">Edit</button></div></div>`;
+  }).join('');
+}
+
+// ── DOCS RENDER ───────────────────────────────────────────────────────────
+function setView(v){
+  currentView=v;
+  document.getElementById('vl').classList.toggle('active',v==='list');
+  document.getElementById('vg').classList.toggle('active',v==='grid');
+  renderDocs();
+}
+
+function renderDocs(){
+  const srch=(document.getElementById('gSearch').value||'').toLowerCase();
+  const tf=document.getElementById('tf').value, sf=document.getElementById('sf').value;
+  let f=allDocs.filter(d=>{
+    const ms=!srch||[d.name,d.number,d.issuer,d.notes,d.custom_label].some(x=>(x||'').toLowerCase().includes(srch));
+    return ms&&(!tf||d.type===tf)&&(!sf||d.status===sf);
+  });
+  f.sort((a,b)=>({"expired":0,"expiring":1,"safe":2}[a.status]||3)-({'expired':0,'expiring':1,'safe':2}[b.status]||3)||(new Date(a.expiry||'9999')-new Date(b.expiry||'9999')));
+  document.getElementById('doc-sub').textContent=`${tf?(docTypes[tf]?.label||tf):'All documents'} · ${f.length} found`;
+  const cont=document.getElementById('docs-container');
+  if(!f.length){
+    cont.innerHTML=`<div class="empty"><div class="empty-emoji">🔍</div><div class="empty-title">${allDocs.length===0?'No Documents Yet':'No Results'}</div><div class="empty-sub">${allDocs.length===0?'Add your first document to get started.':'Try adjusting search or filters.'}</div>${allDocs.length===0?'<button class="btn btn-p" onclick="openAdd()">＋ Add Document</button>':''}</div>`;
+    return;
+  }
+  if(currentView==='list')renderList(f,cont); else renderGrid(f,cont);
+}
+
+function renderList(f,cont){
+  cont.innerHTML=`<div class="tw"><table><thead><tr><th>Document</th><th>Type</th><th>Number</th><th>Expiry Date</th><th>Status</th><th>Days Left</th><th>Actions</th></tr></thead><tbody>${
+  f.map((d,i)=>{
+    const ti=d.type_info||{icon:'📄',label:d.type};
+    const lbl=d.custom_label?d.custom_label:ti.label;
+    const ic=d.custom_icon?d.custom_icon:ti.icon;
+    const dl=d.days_left;
+    const dlc=d.status==='expired'?'var(--danger)':d.status==='expiring'?'var(--warn)':'var(--safe)';
+    const dlTxt=dl===null?'—':dl<0?`-${Math.abs(dl)}d`:dl+'d';
+     const statusText = {safe: '✅ Valid', expiring: '⚠️ Expiring', expired: '❌ Expired'}[d.status] || '';
+    return `<tr style="animation-delay:${i*.04}s"><td><strong>${esc(d.name)}</strong>${d.file_ref?'<span style="margin-left:7px;font-size:11px;color:var(--safe)" title="File attached">📎</span>':''}</td><td><span class="tychip">${ic} ${lbl}</span></td><td style="font-family:monospace;font-size:12px;color:var(--text2)">${esc(d.number||'—')}</td><td>${fmtDate(d.expiry)}</td><td><span class="sbadge ${d.status}">${statusText}</span></td>
+<td style="font-weight:700;color:${dlc}">${dlTxt}</td><td><div style="display:flex;gap:4px"><button class="btn btn-g btn-sm" onclick="viewDoc('${d.id}')">👁</button><button class="btn btn-g btn-sm" onclick="editDoc('${d.id}')">✏️</button><button class="btn btn-ds btn-sm" onclick="delDoc('${d.id}')">🗑</button></div></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+function renderGrid(f,cont){
+  cont.innerHTML=`<div class="doc-grid">${f.map((d,i)=>{
+    const ti=d.type_info||{icon:'📄',label:d.type,color:'#6b7280'};
+    const ic=d.custom_icon||ti.icon, lbl=d.custom_label||ti.label;
+    const col=ti.color||'#6b7280';
+    return `<div class="dcg" style="animation-delay:${i*.05}s"><div class="dcg-top"><div class="dcg-ic" style="background:${col}18">${ic}</div><div style="flex:1;min-width:0"><div class="dcg-nm">${esc(d.name)}${d.file_ref?'<span style="margin-left:5px;font-size:11px">📎</span>':''}</div><div class="dcg-num">${esc(d.number||'No number')}</div><span class="tychip" style="display:inline-flex;margin-top:5px">${ic} ${lbl}</span></div></div><div class="dcg-foot"><div class="exp-txt">Expires<strong class="${d.status}">${fmtDate(d.expiry)}</strong><span class="sbadge ${d.status}" style="font-size:10px;display:inline-flex;margin-top:3px">${d.days_left===null?'No expiry':d.days_left<0?`${Math.abs(d.days_left)}d ago`:d.days_left+'d left'}</span></div><div style="display:flex;gap:4px"><button class="btn btn-g btn-sm" onclick="viewDoc('${d.id}')">👁</button><button class="btn btn-g btn-sm" onclick="editDoc('${d.id}')">✏️</button><button class="btn btn-ds btn-sm" onclick="delDoc('${d.id}')">🗑</button></div></div></div>`;
+  }).join('')}</div>`;
+}
+
+// ── ADD / EDIT ─────────────────────────────────────────────────────────────
+function openAdd(){
+  editId=null; fileRef=null;
+  document.getElementById('mTitle').textContent='📄 Add New Document';
+  ['fName','fNumber','fIssuer','fIssue','fExpiry','fNotes','fText','fCustomLabel','fCustomIcon'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fType').value='passport';
+  document.getElementById('customFields').classList.remove('show');
+  document.getElementById('fFile').value='';
+  document.getElementById('fFilePrev').style.display='none';
+  document.getElementById('detectionBox').style.display='none';
+  openOv('addOv'); setTimeout(()=>document.getElementById('fName').focus(),200);
+}
+
+function editDoc(id){
+  const d=allDocs.find(x=>x.id===id); if(!d)return;
+  editId=id; fileRef=d.file_ref||null;
+  document.getElementById('mTitle').textContent='✏️ Edit Document';
+  document.getElementById('fName').value=d.name||'';
+  document.getElementById('fType').value=d.type||'custom';
+  document.getElementById('fNumber').value=d.number||'';
+  document.getElementById('fIssuer').value=d.issuer||'';
+  document.getElementById('fIssue').value=d.issue||'';
+  document.getElementById('fExpiry').value=d.expiry||'';
+  document.getElementById('fNotes').value=d.notes||'';
+  document.getElementById('fText').value='';
+  document.getElementById('fCustomLabel').value=d.custom_label||'';
+  document.getElementById('fCustomIcon').value=d.custom_icon||'';
+  document.getElementById('customFields').classList.toggle('show',d.type==='custom');
+  document.getElementById('fFile').value='';
+  document.getElementById('detectionBox').style.display='none';
+  if(d.file_ref){
+    document.getElementById('fFilePrev').style.display='block';
+    document.getElementById('fFilePrev').innerHTML=`<div class="upfp">📎 File already attached <button style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--danger)" onclick="removeFile()">Remove</button></div>`;
+  } else { document.getElementById('fFilePrev').style.display='none'; }
+  closeOv('viewOv'); openOv('addOv');
+}
+
+async function saveDoc(){
+  const name=document.getElementById('fName').value.trim();
+  const expiry=document.getElementById('fExpiry').value;
+  if(!name){showToast('Document name is required','error');return;}
+  if(!expiry){showToast('Expiry date is required','error');return;}
+  const payload={
+    name, expiry,
+    type:document.getElementById('fType').value,
+    number:document.getElementById('fNumber').value.trim(),
+    issuer:document.getElementById('fIssuer').value.trim(),
+    issue:document.getElementById('fIssue').value,
+    notes:document.getElementById('fNotes').value.trim(),
+    file_ref:fileRef,
+    custom_label:document.getElementById('fCustomLabel').value.trim(),
+    custom_icon:document.getElementById('fCustomIcon').value.trim(),
+  };
+  const url=editId?`/api/docs/${editId}`:'/api/docs';
+  const method=editId?'PUT':'POST';
+  const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const d=await r.json();
+  if(d.ok){
+    showToast(editId?'Document updated!':'Document added!','success');
+    closeOv('addOv');
+    await init();
+  } else { showToast(d.error||'Error saving document','error'); }
+}
+
+async function delDoc(id){
+  const d=allDocs.find(x=>x.id===id);
+  if(!d||!confirm(`Delete "${d.name}"? Cannot be undone.`))return;
+  const r=await fetch(`/api/docs/${id}`,{method:'DELETE'});
+  if((await r.json()).ok){showToast('Document deleted','warn');await init();}
+}
+
+// ── VIEW MODAL ─────────────────────────────────────────────────────────────
+function viewDoc(id){
+  const d=allDocs.find(x=>x.id===id); if(!d)return;
+  const ti=d.type_info||{icon:'📄',label:d.type,color:'#6b7280'};
+  const ic=d.custom_icon||ti.icon, lbl=d.custom_label||ti.label, col=ti.color||'#6b7280';
+  const dl=d.days_left, st=d.status;
+  const stlbl={safe:'✅ Valid',expiring:'⚠️ Expiring',expired:'❌ Expired'}[st];
+  const dlTxt=dl===null?'No expiry set':dl<0?`Expired ${Math.abs(dl)} days ago`:dl===0?'Expires TODAY!':dl+' days remaining';
+  document.getElementById('vTitle').textContent=d.name;
+  document.getElementById('vEditBtn').onclick=()=>editDoc(id);
+  document.getElementById('vBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:20px;padding:16px;background:var(--bg);border-radius:12px">
+      <div style="width:52px;height:52px;border-radius:14px;background:${col}18;display:flex;align-items:center;justify-content:center;font-size:26px">${ic}</div>
+      <div style="flex:1"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">${esc(d.name)}</div><span class="tychip">${ic} ${lbl}</span></div>
+      <span class="sbadge ${st}">${stlbl}</span>
+    </div>
+    <div class="vgrid">
+      <div class="vfield"><div class="vlbl">Document Number</div><div class="vval" style="font-family:monospace">${esc(d.number||'—')}</div></div>
+      <div class="vfield"><div class="vlbl">Issued By</div><div class="vval">${esc(d.issuer||'—')}</div></div>
+      <div class="vfield"><div class="vlbl">Issue Date</div><div class="vval">${fmtDate(d.issue)}</div></div>
+      <div class="vfield"><div class="vlbl">Expiry Date</div><div class="vval" style="font-weight:700;color:${st==='expired'?'var(--danger)':st==='expiring'?'var(--warn)':'var(--safe)'}">${fmtDate(d.expiry)}</div></div>
+    </div>
+    <div class="vfield" style="margin-top:10px"><div class="vlbl">Days Remaining</div><div class="vval" style="font-weight:600;color:${st==='expired'?'var(--danger)':st==='expiring'?'var(--warn)':'var(--safe)'}">${dlTxt}</div>
+      <div style="background:var(--bg2);border-radius:3px;height:5px;margin-top:8px;overflow:hidden">${dl!==null?`<div style="height:100%;width:${Math.max(0,Math.min(100,dl<0?0:Math.min(dl/3650*100,100)))}%;background:${st==='expired'?'var(--danger)':st==='expiring'?'var(--warn)':'var(--safe)'};border-radius:3px;transition:width .6s"></div>`:''}
+      </div>
+    </div>
+    ${d.notes?`<div class="vfield" style="margin-top:10px"><div class="vlbl">Notes</div><div class="vval" style="color:var(--text2)">${esc(d.notes)}</div></div>`:''}
+    ${d.file_ref?`<div class="vfield" style="margin-top:10px"><div class="vlbl">Attached File</div><a href="/uploads/${d.file_ref}" target="_blank" class="btn btn-g btn-sm" style="display:inline-flex;margin-top:4px">📎 View Attachment</a></div>`:''}
+    <div class="vfield" style="margin-top:10px"><div class="vlbl">Added On</div><div class="vval" style="font-size:12.5px;color:var(--text2)">${d.added_at?d.added_at.split('T')[0]:'—'}</div></div>
+  `;
+  openOv('viewOv');
+}
+
+// ── TYPE CHANGE ─────────────────────────────────────────────────────────────
+function onTypeChange(){
+  const t=document.getElementById('fType').value;
+  document.getElementById('customFields').classList.toggle('show',t==='custom');
+}
+
+// ── FILE UPLOAD ────────────────────────────────────────────────────────────
+async function handleFile(input){
+  const f=input.files[0]; if(!f)return;
+  if(f.size>10*1024*1024){showToast('File too large (max 10MB)','error');return;}
+  showToast('Uploading & scanning for expiry…','');
+  const fd=new FormData(); fd.append('file',f); fd.append('doc_type',document.getElementById('fType').value);
+  const r=await fetch('/api/upload',{method:'POST',body:fd});
+  const d=await r.json();
+  if(d.ok){
+    fileRef=d.file_ref;
+    document.getElementById('fFilePrev').style.display='block';
+    document.getElementById('fFilePrev').innerHTML=`<div class="upfp">✅ <strong>${esc(f.name)}</strong><button style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--danger)" onclick="removeFile()">Remove ✕</button></div>`;
+    showDetection(d.detection, f.name);
+    showToast('File uploaded!','success');
+  } else { showToast(d.error||'Upload failed','error'); }
+}
+
+function showDetection(det, filename){
+  if(!det)return;
+  const box=document.getElementById('detectionBox');
+  box.style.display='block';
+  const confClr=det.confidence;
+  const methIcons={ocr_image:'🔍 OCR from image',filename:'📝 From filename',heuristic:'📅 Estimated (heuristic)',none:'—'};
+  box.innerHTML=`<div class="det-box">
+    <div class="det-title">🤖 Auto-Detection Result</div>
+    ${det.date?`<div class="det-row"><div class="det-icon">📅</div><div class="det-txt">Detected expiry: <strong>${fmtDate(det.date)}</strong> <span class="det-conf ${confClr}">${confClr.toUpperCase()}</span></div></div>`:''} 
+    <div class="det-row"><div class="det-icon">🔧</div><div class="det-txt">Method: <strong>${methIcons[det.method]||det.method}</strong></div></div>
+    ${det.suggestion?`<div class="det-row"><div class="det-icon">💡</div><div class="det-txt">${det.suggestion}</div></div>`:''}
+    ${det.date?`<button class="use-btn" onclick="useDet('${det.date}')">✅ Use this date as Expiry</button>`:''}
+  </div>`;
+}
+
+function useDet(dateStr){ document.getElementById('fExpiry').value=dateStr; showToast('Expiry date applied!','success'); }
+function removeFile(){ fileRef=null; document.getElementById('fFilePrev').style.display='none'; document.getElementById('fFile').value=''; }
+
+// TEXT DETECT
+function scheduleTextDetect(){
+  clearTimeout(detectTimer);
+  detectTimer=setTimeout(async()=>{
+    const txt=document.getElementById('fText').value.trim();
+    if(txt.length<10)return;
+    const r=await fetch('/api/detect-text',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,type:document.getElementById('fType').value})});
+    const d=await r.json();
+    if(d.detected){
+      showDetection({date:d.detected,confidence:d.confidence,method:'text_paste'},'');
+    }
+  },700);
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────
+async function logout(){
+  if(!confirm('Lock the vault?'))return;
+  await fetch('/api/logout',{method:'POST'});
+  window.location.href='/';
+}
+
+async function changePIN(){
+  const old=document.getElementById('oldPin').value.trim();
+  const nw=document.getElementById('newPin').value.trim();
+  const r=await fetch('/api/change-pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_pin:old,new_pin:nw})});
+  const d=await r.json();
+  if(d.ok){showToast('PIN updated successfully!','success');document.getElementById('oldPin').value='';document.getElementById('newPin').value='';}
+  else showToast(d.error||'Error','error');
+}
+
+function exportCSV(){ window.location.href='/api/export/csv'; }
+
+// ── DRAG DROP ─────────────────────────────────────────────────────────────
+function dov(e){e.preventDefault();document.getElementById('upzone').classList.add('dv');}
+function dlv(){document.getElementById('upzone').classList.remove('dv');}
+async function doDrop(e){
+  e.preventDefault(); dlv();
+  const f=e.dataTransfer.files[0]; if(!f)return;
+  const dt=new DataTransfer(); dt.items.add(f);
+  document.getElementById('fFile').files=dt.files;
+  await handleFile(document.getElementById('fFile'));
+}
+
+// ── OVERLAY ───────────────────────────────────────────────────────────────
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+function ovClick(e,id){if(e.target===document.getElementById(id))closeOv(id);}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg,type='success'){
+  const icons={success:'✅',warn:'⚠️',error:'❌','':'⏳'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`; t.innerHTML=`${icons[type]||'ℹ️'} ${msg}`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtDate(d){if(!d||d==='None')return '—';try{return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;}}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeOv('addOv');closeOv('viewOv');}
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAdd();}
+});
+
+init();
+</script></body></html>
