@@ -1,7 +1,7 @@
-🧠 DocuMind — Secure Personal Document Vault
+# 🧠 DocuMind — Secure Personal Document Vault
 A Python/Flask desktop application for securely storing and managing personal documents with AI-powered expiry auto-detection.
 
-Features
+# Features
 🔐 AES-256 Encryption — All data encrypted using PBKDF2 (390,000 iterations) + Fernet/AES-256
 🔑 PIN Authentication — Session-based vault locking with PIN verification
 🤖 Auto-Detection — Smart expiry date detection via:
@@ -17,17 +17,17 @@ Document-type heuristics
 🔍 Search & Filter — By type, status, and keyword
 📤 CSV Export — Export all document data
 Setup & Run
-# 1. Install dependencies
+1. Install dependencies
 pip install -r requirements.txt
 
-# Optional: Install tesseract for OCR (Ubuntu/Debian)
+Optional: Install tesseract for OCR (Ubuntu/Debian)
 sudo apt-get install tesseract-ocr
 
-# 2. Run the server
+2. Run the server
 python app.py
 
-# 3. Open in browser
-# http://127.0.0.1:5050
+3. Open in browser
+http://127.0.0.1:5050
 Security Architecture
 User PIN
    │
